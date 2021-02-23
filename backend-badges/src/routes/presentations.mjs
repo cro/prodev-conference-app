@@ -151,23 +151,9 @@ router.put('/:id/approved', async ctx => {
 
   const { email, presenterName, companyName, title, synopsis } = rows[0];
 
-
-  const posturl = `http://api/api/events/${eventId}/badges`
-  const options = { url: posturl,
-                    headers: {
-                      'Authorization:':
-                    }}
-  await request.post(posturl,
-                     {form: {name: presenterName, email: email,
-                             company_name: companyName,
-                             role: 'SPEAKER'}});
-  // await pool.query(`
-  //   INSERT INTO badges (email, name, company_name, role, event_id)
-  //   VALUES ($1, $2, $3, 'SPEAKER', $4)
-  //   ON CONFLICT (email, event_id)
-  //   DO
-  //   UPDATE SET role = 'SPEAKER'
-  // `, [email, presenterName, companyName, eventId]);
+  await request.post('http://api/events/:eventId/badges',
+                     {form: {email: email, company_name: companyName,
+                             role: 'SPEAKER', name: presenterName}});
 
   ctx.body = {
     id,

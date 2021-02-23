@@ -1,7 +1,7 @@
 {
-  "name": "prodev-conference-app-backend",
+  "name": "prodev-conference-app-backend-badges",
   "version": "1.0.0",
-  "description": "The backend for the Professional Development Conference App.",
+  "description": "The Badges microservice for the Conferece App.",
   "main": "src/server.mjs",
   "scripts": {
     "dev": "nodemon src/server.mjs",
@@ -27,6 +27,8 @@
     "pg": "^8.5.1",
     "qrcode": "^1.4.4",
     "request": "^2.88.2",
+    "run": "^1.4.0",
+    "start": "^5.1.0",
     "swagger-parser": "^10.0.2",
     "swagger-ui-dist": "^3.41.1"
   }

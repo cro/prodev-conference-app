@@ -1,0 +1,32 @@
+
+version: '3.7'
+services:
+  api:
+    image: nginx:1.19
+    volumes:
+      - /Users/cro/src/mo/prodev-conference-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+
+  badge_microservice:
+    image: badges
+    build:
+      context: backend-badges
+    ports:
+        - "8083:80"
+
+  # auth:
+  #   image: mo-compose-auth:latest
+  #   build:
+  #     context: auth/
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - /Users/cro/src/mo/prodev-composed-services/auth/src:/usr/src/app/src
+  #   environment:
+  #     JWT_SECRET: dkveiqaetidasdoet
+  #     MONGODB_URL: mongodb://mongodb/prodev-composed-auth
+
+  # mongodb:
+  #   image: mongo:4-bionic
+  #   volumes:
+  #     - /Users/cro/src/mo/prodev-composed-services/auth/data:/data/db

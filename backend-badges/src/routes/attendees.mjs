@@ -2,7 +2,6 @@ import { authorize, identify } from '../security.mjs';
 import { pool } from '../db/index.mjs';
 import { trimProperty } from '../strings.mjs';
 import Router from '@koa/router';
-import request from 'request'
 
 export const router = new Router({
   prefix: '/events/:eventId/attendees',
@@ -91,9 +90,12 @@ router.post('/', async ctx => {
     };
   }
 
-  await request.post('http://api/events/:eventId/badges',
-                     {form: {name: name, email: email, company_name: companyName,
-                             role: ''}});
+  await pool.query(`
+    INSERT INTO badges (email, name, company_name, role, event_id)
+    VALUES ($1, $2, $3, '', $4)
+    ON CONFLICT (email, event_id)
+    DO NOTHING
+  `, [email, name, companyName, eventId]);
 
   const { id, created } = attendeesRows[0];
   ctx.status = 201;

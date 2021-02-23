@@ -1,0 +1,58 @@
+
+version: '3.7'
+services:
+  api:
+    image: nginx:1.19
+    volumes:
+      - /Users/cro/src/mo/prodev-conference-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+
+  badge-microservice:
+    image: badges
+    build:
+      context: backend-badges
+      dockerfile: Dockerfile.dev
+    ports:
+        - "8083:8083"
+    volumes:
+      - /Users/cro/src/mo/prodev-conference-app/backend-badges:/app
+    environment:
+      PGHOST: host.docker.internal
+      PGPORT: 5432
+      PGDATABASE: conference_app_badges
+      PGUSER: conference_app_user
+      PGPASSWORD: conference_app_user
+      PGAPPNAME: "Conference GO!"
+
+  all-microservice:
+    image: conference
+    build:
+      context: backend
+      dockerfile: Dockerfile.dev
+    ports:
+        - "8081:8081"
+    volumes:
+      - /Users/cro/src/mo/prodev-conference-app/backend:/app
+    environment:
+      PGHOST: host.docker.internal
+      PGPORT: 5432
+      PGDATABASE: conference_app_badges
+      PGUSER: conference_app_user
+      PGPASSWORD: conference_app_user
+      PGAPPNAME: "Conference GO!"
+  # auth:
+  #   image: mo-compose-auth:latest
+  #   build:
+  #     context: auth/
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - /Users/cro/src/mo/prodev-composed-services/auth/src:/usr/src/app/src
+  #   environment:
+  #     JWT_SECRET: dkveiqaetidasdoet
+  #     MONGODB_URL: mongodb://mongodb/prodev-composed-auth
+
+  # mongodb:
+  #   image: mongo:4-bionic
+  #   volumes:
+  #     - /Users/cro/src/mo/prodev-composed-services/auth/data:/data/db

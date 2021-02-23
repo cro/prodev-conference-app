@@ -1,0 +1,578 @@
+openapi: 3.0.1
+info:
+  title: Conference GO!
+  description: 'This is the Professional Develpoment monolith application used to refactor into microservices.'
+  contact:
+    email: profdev@hackreactor.com
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/
+tags:
+- name: badges
+  description: Creating, updating, and retrieving attendee and speaker badges
+paths:
+  /api/events/{eventId}/badges:
+    parameters:
+    - name: eventId
+      in: path
+      required: true
+      description: The numerical identifier of the event
+      schema:
+        type: integer
+    get:
+      tags:
+      - badges
+      summary: Gets the badges for an event
+      responses:
+        200:
+          description: The list of the badges for an event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Badge'
+        401:
+          description: Unauthorized access with code INVALID_TOKEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+  /api/events/{eventId}/presentations:
+    parameters:
+    - name: eventId
+      in: path
+      required: true
+      description: The numerical identifier of the event
+      schema:
+        type: integer
+    get:
+      tags:
+      - presentations
+      summary: Get the presentation proposals in the system
+      responses:
+        200:
+          description: The list of presentation proposals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Presentation'
+        401:
+          description: Unauthorized access with code INVALID_TOKEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+      - presentations
+      summary: Create a new presentation proposal in the system
+      requestBody:
+        description: The presentation proposal
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresentationCreation'
+      responses:
+        201:
+          description: The list of presentation proposals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Presentation'
+        401:
+          description: Unauthorized access with code INVALID_TOKEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+  /api/events/{eventId}/presentations/{id}/approved:
+    parameters:
+    - name: eventId
+      in: path
+      required: true
+      description: The numerical identifier of the event
+      schema:
+        type: integer
+    - name: id
+      in: path
+      required: true
+      description: The numerical identifier of the presentation
+      schema:
+        type: integer
+    put:
+      tags:
+      - presentations
+      summary: Approves the presentation proposal
+      responses:
+        200:
+          description: The presentation detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresentationDecided'
+        401:
+          description: Unauthorized access with code INVALID_TOKEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Could not find a presentation that could be rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+  /api/events/{eventId}/presentations/{id}/rejected:
+    parameters:
+    - name: eventId
+      in: path
+      required: true
+      description: The numerical identifier of the event
+      schema:
+        type: integer
+    - name: id
+      in: path
+      required: true
+      description: The numerical identifier of the event
+      schema:
+        type: integer
+    put:
+      tags:
+      - presentations
+      summary: Approves the presentation proposal
+      responses:
+        200:
+          description: The presentation detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresentationDecided'
+        401:
+          description: Unauthorized access with code INVALID_TOKEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Could not find a presentation that could be rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+  /api/locations:
+    get:
+      tags:
+      - locations
+      summary: Get the locations in the system
+      responses:
+        200:
+          description: The list of the locations in the system
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+        401:
+          description: Unauthorized access with code INVALID_TOKEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+      - locations
+      summary: Create a location in the system
+      requestBody:
+        description: The data for a location
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationCreation'
+      responses:
+        201:
+          description: Sucessful creation of the location
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+        400:
+          description: Not all values are proper with code INVALID_PARAMETER
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: Unauthorized access with code INVALID_TOKEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+  /api/session:
+    put:
+      tags:
+      - session
+      summary: Create a session for the person
+      requestBody:
+        description: The information used to create the session. The email and password parameters will be trimmed of leading and trailing whitespace.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+        required: true
+      responses:
+        201:
+          description: Successful session creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        400:
+          description: Could not create the session with code BAD_CREDENTIALS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Error:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+          - BAD_CREDENTIALS
+          - INVALID_TOKEN
+          - INVALID_IDENTIFIER
+          - INVALID_PARAMETER
+          - MISSING_PARAMETER
+          - VERSION_CONFLICT
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              message:
+                type: string
+              rule:
+                type: string
+    Token:
+      required:
+      - token
+      type: object
+      properties:
+        token:
+          type: string
+    AccountInformation:
+      required:
+      - name
+      - email
+      - password
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          maxLength: 100
+          format: email
+        password:
+          type: string
+    AttendeeCreation:
+      required:
+      - name
+      - email
+      - companyName
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          maxLength: 100
+          format: email
+        companyName:
+          type: string
+          minLength: 1
+          maxLength: 100
+    Attendee:
+      allOf:
+        - $ref: '#/components/schemas/AttendeeCreation'
+        - type: object
+          required:
+          - id
+          - created
+          properties:
+            id:
+              type: integer
+            created:
+              type: string
+              format: date-time
+    Badge:
+      required:
+      - name
+      - companyName
+      - role
+      - code
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        role:
+          type: string
+          maxLength: 10
+        companyName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        code:
+          type: string
+    Credentials:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          maxLength: 100
+          format: email
+        password:
+          type: string
+    Empty:
+      type: object
+    Event:
+      allOf:
+      - $ref: '#/components/schemas/EventSummary'
+      - type: object
+        required:
+        - location
+        - created
+        - updated
+        - version
+        - numberOfPresentations
+        - maximumNumberOfAttendees
+        properties:
+          location:
+            $ref: '#/components/schemas/Location'
+          created:
+            type: string
+            format: date-time
+          updated:
+            type: string
+            format: date-time
+          version:
+            type: integer
+          numberOfPresentations:
+            type: integer
+            minimum: 1
+          maximumNumberOfAttendees:
+            type: integer
+            minimum: 1
+    EventStructure:
+      allOf:
+      - $ref: '#/components/schemas/EventSummary'
+      - type: object
+        required:
+        - locationId
+        - version
+        - numberOfPresentations
+        - maximumNumberOfAttendees
+        properties:
+          locationId:
+            type: integer
+          updated:
+            type: string
+            format: date-time
+          version:
+            type: integer
+          numberOfPresentations:
+            type: integer
+            minimum: 1
+          maximumNumberOfAttendees:
+            type: integer
+            minimum: 1
+    EventCreation:
+      required:
+      - name
+      - description
+      - location
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        locationId:
+          type: integer
+    EventSummary:
+      required:
+      - id
+      - name
+      - description
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          maxLength: 100
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        description:
+          type: string
+        logoUrl:
+          type: string
+    LocationCreation:
+      required:
+      - name
+      - city
+      - state
+      - maximumVendorCount
+      - roomCount
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+        state:
+          type: string
+          minLength: 2
+          maxLength: 2
+        maximumVendorCount:
+          type: integer
+        roomCount:
+          type: integer
+    Location:
+      allOf:
+        - $ref: '#/components/schemas/LocationCreation'
+        - type: object
+          required:
+          - id
+          - created
+          - updated
+          - version
+          properties:
+            id:
+              type: integer
+            created:
+              type: string
+              format: date-time
+            updated:
+              type: string
+              format: date-time
+            version:
+              type: integer
+    PresentationCreation:
+      required:
+      - email
+      - presenterName
+      - companyName
+      - title
+      - synopsis
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        presenterName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        companyName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        title:
+          type: string
+          minLength: 8
+          maxLength: 100
+        synopsis:
+          type: string
+          minLength: 50
+    Presentation:
+      allOf:
+      - $ref: '#/components/schemas/PresentationCreation'
+      - type: object
+        required:
+        - id
+        - created
+        - status
+        properties:
+          id:
+            type: integer
+          created:
+            type: string
+            format: date-time
+          status:
+            type: string
+            enum:
+            - SUBMITTED
+            - APPROVED
+            - REJECTED
+    PresentationDecided:
+      allOf:
+        - $ref: '#/components/schemas/Presentation'
+        - type: object
+          required:
+          - decider
+          - decidedOn
+          properties:
+            decider:
+              type: object
+              required:
+              - name
+              - decidedOn
+              properties:
+                name:
+                  type: string
+                decidedOn:
+                  type: string
+                  format: date-time
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 

@@ -45,15 +45,11 @@ exports.up = async function(db) {
       type: 'int',
       unsigned: true,
       notNull: true,
-      foreignKey: {
-        name: 'badges_event_id_fk',
-        table: 'events',
-        rules: {
-          onDelete: 'CASCADE',
-          onUpdate: 'RESTRICT',
-        },
-        mapping: 'id',
-      }
+    },
+    account_id: {
+      type: 'int',
+      unsigned: true,
+      notNull: true,
     },
   });
   return await db.addIndex('badges', 'badges_email_event_id_ux', ['email', 'event_id'], true);
