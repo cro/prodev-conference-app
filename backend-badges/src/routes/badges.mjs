@@ -20,7 +20,7 @@ router.post('/', async ctx => {
     name: 'required|minLength:1',
     email: 'required|email',
     company_name: 'required|minLength:1',
-    role: 'optional',
+    role: 'minLength:1',
   });
   let fails1 = await v1.fails();
   if (fails1) {
@@ -49,23 +49,15 @@ router.post('/', async ctx => {
   let company_name = ctx.request.body['company_name'];
   let email = ctx.request.body['email'];
   let role = ctx.request.body['role'];
+  console.log(ctx.claims);
   const { rows } = await pool.query(`
     INSERT into badges(event_id, email, name,
                        company_name, role, account_id)
     VALUES ($1, $2, $3, $4, $5, $6)
-    ON CONFLICT (account_id) DO UPDATE SET
+    ON CONFLICT (event_id, email) DO UPDATE SET
        event_id = $1, email = $2, name = $3, company_name = $4,
        role = $5, account_id = $6
   `, [eventId, email, attendee_name, company_name, role, ctx.claims.id]);
-  ctx.body = {
-    name: attendee_name,
-    companyName: company_name,
-    role: role,
-  }
-  for (let item of ctx.body) {
-    item.qrcode = await qrcode.toString(`${item.id}|${item.name}`);
-    console.log(item);
-  }
 });
 router.get('/', async ctx => {
   const { eventId } = ctx.params;
@@ -85,8 +77,8 @@ router.get('/', async ctx => {
   const { rows } = await pool.query(`
     SELECT b.id, b.event_id, b.email, b.name, b.company_name AS "companyName", b.role
     FROM badges b
-    WHERE b.event_id = $2
-  `, [ctx.claims.id, eventId])
+    WHERE b.event_id = $1
+  `, [eventId])
   ctx.body = rows.map(x => ({
     name: x.name,
     companyName: x.companyName,
