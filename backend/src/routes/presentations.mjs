@@ -117,6 +117,7 @@ router.post('/', async ctx => {
 });
 
 router.put('/:id/approved', async ctx => {
+  console.log("Trying to approve... !@#$!@#$!@#$!@#$")
   const { eventId } = ctx.params;
   let v = await ctx.validator(ctx.params, {
     eventId: 'required|integer',
@@ -152,15 +153,18 @@ router.put('/:id/approved', async ctx => {
   const { email, presenterName, companyName, title, synopsis } = rows[0];
 
 
-  const posturl = `http://api/api/events/${eventId}/badges`
-  const options = { url: posturl,
+  const posturl = `http://api/api/events/${eventId}/badges`;
+  console.log("!@#$!@#$!@#$")
+
+  const options = { url: `http://api/api/events/${eventId}/badges`,
                     headers: {
-                      'Authorization:':
-                    }}
-  await request.post(posturl,
-                     {form: {name: presenterName, email: email,
+                      'Authorization': ctx.get('Authorization')
+                    },
+                    form: {name: presenterName, email: email,
                              company_name: companyName,
-                             role: 'SPEAKER'}});
+                             role: 'SPEAKER'}};
+  console.log(options);
+  await request.post(options);
   // await pool.query(`
   //   INSERT INTO badges (email, name, company_name, role, event_id)
   //   VALUES ($1, $2, $3, 'SPEAKER', $4)
